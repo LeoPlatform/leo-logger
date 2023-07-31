@@ -25,7 +25,7 @@ function generateSettings(namespace, force) {
 	return s;
 }
 
-module.exports = function (namespace) {
+module.exports = function(namespace) {
 	let mySettings = generateSettings(namespace);
 	let subLogger = {};
 
@@ -56,7 +56,7 @@ module.exports = function (namespace) {
 			return subLogger[n];
 		},
 		info: log.bind(log, 'info', 'log'),
-		json: function () {
+		json: function() {
 			for (let i = 0; i < arguments.length; i++) {
 				log("info", "log", JSON.stringify(arguments[i], null, 2));
 			}
@@ -64,9 +64,11 @@ module.exports = function (namespace) {
 		time: log.bind(log, 'time', 'time'),
 		timeEnd: log.bind(log, 'time', 'timeEnd'),
 		log: log.bind(log, 'info', 'log'),
-		debug: log.bind(log, 'debug', 'log'),
+		debug: log.bind(log, 'debug', 'debug'),
+		trace: log.bind(log, 'trace', 'trace'),
 		error: log.bind(log, 'error', 'error'),
-		configure: function (s, config) {
+		warn: log.bind(log, 'warn', 'warn'),
+		configure: function(s, config) {
 			if (s === true) {
 				settings.push({
 					regex: /.*/,
@@ -96,33 +98,43 @@ if (process.env.LEO_LOGGER) {
 	if (process.env.LEO_LOGGER == "true") {
 		module.exports.configure(true);
 	} else {
-		let parts = process.env.LEO_LOGGER.split("/");
-		let regex;
-		let config;
-		let lookup = {
-			a: "all",
-			t: "time",
-			i: "info",
-			d: "debug",
-			e: "error",
-			s: "info",
-			v: "debug",
-			T: "printTimestamp"
-		};
-		if (parts.length == 1) {
-			regex = new RegExp(parts[0]);
-		} else if (parts.length > 2) {
-			regex = new RegExp(parts[1]);
-			let flags = parts[2];
-			config = {
-				all: flags.length == 0
+		let loggers = process.env.LEO_LOGGER.split(";");
+		loggers.forEach(logger => {
+			let parts = logger.split("/");
+			let regex;
+			let config;
+			let lookup = {
+				a: "all",
+				t: "time",
+				i: "info",
+				d: "debug",
+				e: "error",
+				s: "info",
+				v: "debug",
+				w: "warn",
+				x: "trace",
+				T: "printTimestamp",
+				j: "json"
 			};
-			for (let i = 0; i < flags.length; i++) {
-				if (flags[i] in lookup) {
-					config[lookup[flags[i]]] = true;
+
+			if (parts.length == 1 && parts[0] == '') {
+				return;
+			}
+			if (parts.length == 1) {
+				regex = new RegExp(parts[0]);
+			} else if (parts.length > 2) {
+				regex = new RegExp(parts[1]);
+				let flags = parts[2];
+				config = {
+					all: flags.length == 0
+				};
+				for (let i = 0; i < flags.length; i++) {
+					if (flags[i] in lookup) {
+						config[lookup[flags[i]]] = true;
+					}
 				}
 			}
-		}
-		module.exports.configure(regex, config);
+			module.exports.configure(regex, config);
+		});
 	}
 }
