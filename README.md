@@ -10,6 +10,8 @@ Such an awesome logger that we had to break it out from the LEO SDK and make it 
  * log
  * debug
  * error
+ * warn
+ * trace
  * configure
 
 ## Available configuration options
@@ -18,12 +20,20 @@ Such an awesome logger that we had to break it out from the LEO SDK and make it 
  * i = info
  * d = debug
  * e = error
+ * w = warn
+ * x = trace
+ * j = json
  * T = printTimestamp
 
 ## Usage example:
 ```bash
 export LEO_LOGGER='/.*/d'
 ```
+
+```bash
+export LEO_LOGGER='/my-logger/wei;/.*/ei'
+```
+
 
 ## Working with namespaces
 You can log logs for specific namespaces by passing a string when requiring the leo-logger. Example:
