@@ -29,6 +29,24 @@ module.exports = function(namespace) {
 	let mySettings = generateSettings(namespace);
 	let subLogger = {};
 
+	function logLazy(type, method, fn) {
+		let config = mySettings.config[type];
+
+		if (config && config.trace) {
+			let args = fn && fn() || [];
+			args = Array.isArray(args) ? args : [args];
+			mySettings.config.printTimestamp && type !== 'time' && args.unshift(`[${(new Date()).toUTCString()}]`); //add timestamp to logs
+			console[method].apply(console, args);
+			let stack = new Error().stack;
+			console.log(stack.split(/\n\s+at\s(?=\w)/m)[2]);
+		} else if (config === true || mySettings.config.all) {
+			let args = fn && fn() || [];
+			args = Array.isArray(args) ? args : [args];
+			mySettings.config.printTimestamp && type !== 'time' && args.unshift(`[${(new Date()).toUTCString()}]`); //add timestamp to logs
+			console[method].apply(console, args);
+		}
+
+	}
 	function log(type, method, ...args) {
 		if (type != "time") {
 			args = [namespace].concat(args)
@@ -46,6 +64,10 @@ module.exports = function(namespace) {
 				console[method].apply(console, args);
 			}
 		}
+	}
+	function isEnabled(type) {
+		let config = mySettings.config[type];
+		return config === true || mySettings.config.all;
 	}
 
 	return {
@@ -68,6 +90,21 @@ module.exports = function(namespace) {
 		trace: log.bind(log, 'trace', 'trace'),
 		error: log.bind(log, 'error', 'error'),
 		warn: log.bind(log, 'warn', 'warn'),
+
+		infoLazy: logLazy.bind(logLazy, 'info', 'log'),
+		logLazy: logLazy.bind(logLazy, 'info', 'log'),
+		debugLazy: logLazy.bind(logLazy, 'debug', 'debug'),
+		traceLazy: logLazy.bind(logLazy, 'trace', 'trace'),
+		errorLazy: logLazy.bind(logLazy, 'error', 'error'),
+		warnLazy: logLazy.bind(logLazy, 'warn', 'warn'),
+
+		isEnabled: isEnabled.bind(isEnabled),
+		isInfo: isEnabled.bind(isEnabled, "info"),
+		isLog: isEnabled.bind(isEnabled, "info"),
+		isDebug: isEnabled.bind(isEnabled, "debug"),
+		isError: isEnabled.bind(isEnabled, "error"),
+		isWarn: isEnabled.bind(isEnabled, "warn"),
+
 		configure: function(s, config) {
 			if (s === true) {
 				settings.push({
