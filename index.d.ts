@@ -15,12 +15,12 @@ declare module 'leo-logger' {
 		error: typeof console.error;
 		warn: typeof console.warn;
 
-		infoLazy(fn: (...args: any[]) => void);
-		logLazy(fn: (...args: any[]) => void);
-		debugLazy(fn: (...args: any[]) => void);
-		traceLazy(fn: (...args: any[]) => void);
-		errorLazy(fn: (...args: any[]) => void);
-		warnLazy(fn: (...args: any[]) => void);
+		infoLazy(fn: () => any | any[]);
+		logLazy(fn: () => any | any[]);
+		debugLazy(fn: () => any | any[]);
+		traceLazy(fn: () => any | any[]);
+		errorLazy(fn: () => any | any[]);
+		warnLazy(fn: () => any | any[]);
 
 		isEnabled(): boolean;
 		isInfo(): boolean;
@@ -28,6 +28,18 @@ declare module 'leo-logger' {
 		isDebug(): boolean;
 		isError(): boolean;
 		isWarn(): boolean;
+
+		configure(s: boolean | string | RegExp, config?: boolean | {
+			all?: boolean;
+			time?: boolean;
+			info?: boolean;
+			debug?: boolean;
+			error?: boolean;
+			warn?: boolean;
+			trace?: boolean;
+			printTimestamp?: boolean;
+			json?: boolean;
+		});
 	}
 
 	const exp: OutType;
